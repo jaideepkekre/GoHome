@@ -7,23 +7,18 @@ import (
 	"log"
 	"net/http"
 	"github.com/gorilla/mux"
+	
 )
 
 func main() {
-
 	router := mux.NewRouter()
 	router.HandleFunc("/sample", Sample).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8001", router))
 }
 
-func failOnError(err error, msg string) {
-	if err != nil {
-		log.Fatalf("%s: %s", msg, err)
-	}
-}
+
 
 func Sample(w http.ResponseWriter, r *http.Request) {
-
 	var f interface{}
 	body, _ := ioutil.ReadAll(r.Body)
 	_ = json.Unmarshal(body, &f)

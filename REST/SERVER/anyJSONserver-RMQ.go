@@ -45,7 +45,7 @@ func failOnError(err error, msg string) {
 func sample(w http.ResponseWriter, r *http.Request) {
 
 	var dummy interface{}
-	body, _ := ioutil.ReadAll(r.Body)
+	body, _ :=  ioutil.ReadAll(r.Body)
 	_ = json.Unmarshal(body, &dummy)
 	json_map := dummy.(map[string]interface{})
 	byte_payload, _ := json.Marshal(json_map)
