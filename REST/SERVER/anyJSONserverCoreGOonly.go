@@ -23,7 +23,9 @@ func Sample(w http.ResponseWriter, r *http.Request) {
 	m := f.(map[string]interface{})
 	something, _ := json.Marshal(m)
 	print(something)
-	http.Error(w,"",http.StatusAccepted)
+	w.WriteHeader(203)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(body)
 
 }
 
@@ -31,5 +33,5 @@ func main() {
 
 	http.HandleFunc("/sample", Sample)
 	http.HandleFunc("/headers", headers)
-	http.ListenAndServe(":8091", nil)
+	http.ListenAndServe(":8092", nil)
 }

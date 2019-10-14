@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+
 	"github.com/gorilla/mux"
-	
 )
 
 func main() {
@@ -16,8 +16,6 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8001", router))
 }
 
-
-
 func Sample(w http.ResponseWriter, r *http.Request) {
 	var f interface{}
 	body, _ := ioutil.ReadAll(r.Body)
@@ -25,4 +23,7 @@ func Sample(w http.ResponseWriter, r *http.Request) {
 	m := f.(map[string]interface{})
 	something, _ := json.Marshal(m)
 	print(something)
+	w.WriteHeader(211)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(body)
 }
