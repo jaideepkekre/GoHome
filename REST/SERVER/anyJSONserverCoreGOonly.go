@@ -2,18 +2,33 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
-func headers(w http.ResponseWriter, req *http.Request) {
+func AuthMiddleware(h http.Handler) http.Handler {
+	log.Println("Creating AuthMiddleWare")
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("In AuthMiddleWare")
+		h.ServeHTTP(w, r)
+		// w.WriteHeader(400)
+	})
+}
 
-	for name, headers := range req.Header {
-		for _, h := range headers {
-			fmt.Fprintf(w, "%v: %v\n", name, h)
+func ResourceHandler(handlr func(w http.ResponseWriter, r *http.Request), verb string) http.Handler {
+	log.Println("Creating ResourceHandler")
+	wrappedHandlr := AuthMiddleware(http.HandlerFunc(handlr))
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("In ResourceHandler")
+		if r.Method == verb {
+			wrappedHandlr.ServeHTTP(w, r)
+		} else {
+			w.WriteHeader(http.StatusMethodNotAllowed)
 		}
-	}
+
+	})
+
 }
 
 func Sample(w http.ResponseWriter, r *http.Request) {
@@ -21,9 +36,9 @@ func Sample(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	_ = json.Unmarshal(body, &f)
 	m := f.(map[string]interface{})
-	something, _ := json.Marshal(m)
-	print(something)
-	w.WriteHeader(203)
+	sm, _ := json.Marshal(m)
+	log.Println("In Sample", sm )
+	// w.WriteHeader(203)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(body)
 
@@ -31,7 +46,6 @@ func Sample(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	http.HandleFunc("/sample", Sample)
-	http.HandleFunc("/headers", headers)
+	http.Handle("/sample", ResourceHandler(Sample, http.MethodGet))
 	http.ListenAndServe(":8092", nil)
 }
