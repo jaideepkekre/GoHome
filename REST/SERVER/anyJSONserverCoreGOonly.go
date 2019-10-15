@@ -10,17 +10,18 @@ import (
 func AuthMiddleware(h http.Handler) http.Handler {
 	log.Println("Creating AuthMiddleWare")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("In AuthMiddleWare")
+		log.Println("AuthMiddleWare Invoked")
 		h.ServeHTTP(w, r)
 		// w.WriteHeader(400)
 	})
 }
 
 func ResourceHandler(handlr func(w http.ResponseWriter, r *http.Request), verb string) http.Handler {
+	
 	log.Println("Creating ResourceHandler")
 	wrappedHandlr := AuthMiddleware(http.HandlerFunc(handlr))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("In ResourceHandler")
+		log.Println("ResourceHandler Invoked")
 		if r.Method == verb {
 			wrappedHandlr.ServeHTTP(w, r)
 		} else {
