@@ -7,8 +7,8 @@ import (
 	"net/http"
 )
 
-func AuthMiddleware(h http.Handler) http.Handler {
-	log.Println("Creating AuthMiddleWare")
+func AuthMiddleware(h http.Handler, comment string) http.Handler {
+	log.Println("Creating AuthMiddleWare for "+ comment)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("AuthMiddleWare Invoked")
 		h.ServeHTTP(w, r)
@@ -16,10 +16,10 @@ func AuthMiddleware(h http.Handler) http.Handler {
 	})
 }
 
-func ResourceHandler(handlr func(w http.ResponseWriter, r *http.Request), verb string) http.Handler {
+func ResourceHandler(handlr func(w http.ResponseWriter, r *http.Request),comment string, verb string) http.Handler {
 	
-	log.Println("Creating ResourceHandler")
-	wrappedHandlr := AuthMiddleware(http.HandlerFunc(handlr))
+	log.Println("Creating ResourceHandler for " + comment)
+	wrappedHandlr := AuthMiddleware(http.HandlerFunc(handlr),comment)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("ResourceHandler Invoked")
 		if r.Method == verb {
@@ -39,14 +39,14 @@ func Sample(w http.ResponseWriter, r *http.Request) {
 	m := f.(map[string]interface{})
 	sm, _ := json.Marshal(m)
 	log.Println("In Sample", sm )
-	// w.WriteHeader(203)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(203)
 	w.Write(body)
 
 }
 
 func main() {
 
-	http.Handle("/sample", ResourceHandler(Sample, http.MethodGet))
+	http.Handle("/sample", ResourceHandler(Sample, http.MethodGet,"Sample Endpoint"))
 	http.ListenAndServe(":8092", nil)
 }
